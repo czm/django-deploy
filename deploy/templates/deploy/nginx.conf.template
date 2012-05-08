@@ -1,0 +1,67 @@
+server {
+    listen {{ SITE_PORT }};
+    server_name {{ SITE_NAME }} www.{{ SITE_NAME }};
+    root {{ PROJECT_PATH }}/public_html;
+
+    access_log {{ VENV_PATH }}/logs/nginx_access.log;
+    error_log {{ VENV_PATH }}/logs/nginx_error.log;
+
+    # favicons will be directed to <project>/media/imgs/favicon.ico. access_log of for that.
+    location ~ ^/favicon.ico$ {
+        root {{ PROJECT_PATH }}/media/imgs;
+        log_not_found off;
+        access_log off;
+        expires max;
+    }
+
+    # robots.txt should be in public_html. access_log off for that.
+    location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+    }
+
+    # media :)
+    location /media/ {
+        root {{ PROJECT_PATH }};
+        # do not log media to access_log
+        location ~* ^.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|mov) {
+            access_log   off;
+            expires      30d;
+        }
+    }
+
+    # we can collect status from there.
+    location /nginx_status {
+        stub_status on;
+        access_log off;
+        allow 127.0.0.1;
+        deny all;
+    }
+
+    # site root
+    location / {
+        # if exists a 503.php in public_html we put site into maintance
+        if (-f $document_root/503.php) {
+            error_page 503 @maintenance;
+            return 503;
+        }
+        uwsgi_read_timeout 120;
+        uwsgi_send_timeout 120;
+        uwsgi_pass unix://{{ VENV_PATH }}/tmp/uwsgi.sock;
+        include uwsgi_params;
+        #uwsgi_pass 127.0.0.1:1080;
+    }
+
+    # to get in maintang, just put a 503.php file at web home.
+    error_page 503 @maintenance;
+    location @maintenance {
+        #rewrite ^(.*)$ /503.php break;
+        include /etc/nginx/fastcgi_params;
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_param SERVER_NAME $host;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_index 503.php;
+    }
+}
+# vim: ft=nginx

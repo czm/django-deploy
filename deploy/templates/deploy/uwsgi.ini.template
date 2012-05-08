@@ -1,0 +1,40 @@
+[uwsgi]
+; uwsgi configuration options: http://projects.unbit.it/uwsgi/wiki/Doc
+
+; venv dir, socket, pid, uid, etc
+env=DJANGO_SETTINGS_MODULE={{ PROJECT_NAME }}.settings
+virtualenv={{ VENV_PATH }}/
+module=deploy.wsgi_app
+socket={{ VENV_PATH }}/tmp/uwsgi.sock
+pidfile={{ VENV_PATH }}/tmp/uwsgi.pid
+touch-reload={{ VENV_PATH }}/tmp/restart.txt
+uid={{ UID }}
+gid={{ GID }}
+no-orphans=true
+die-on-term=true
+vacuum=true
+
+; process is number of workers, one worker per core.
+; cpu-affinity make sure that 1 worker don't change between various cores.
+;
+; listen isn't port that will listen for connections!
+processes=4
+;cpu-affinity=1
+listen=5000
+;master=true
+; Every request that take longer than 60 seconds will die!
+harakiri=300
+harakiri-verbose=true
+post-buffering=8192
+buffer-size=25000
+
+; logging stuff
+daemonize={{ VENV_PATH }}/logs/uwsgi.log
+; when true, disable-logging will disable request logging, only errors will be logged.
+disable-logging=true
+logdate=true
+log-zero=true
+log-5xx=true
+log-reopen=true
+
+# vim: ft=dosini

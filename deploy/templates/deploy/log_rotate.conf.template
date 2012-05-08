@@ -1,0 +1,52 @@
+{{ VENV_PATH }}/logs/uwsgi.log {
+	size 100M
+	create 0660 www-data {{ GID }}
+	rotate 5
+	maxage 124
+	compress
+	compresscmd /bin/bzip2
+	compressoptions -z9
+	compressext .bz2
+	copytruncate
+	notifempty
+	postrotate
+		touch {{ VENV_PATH }}/tmp/restart.txt
+	endscript
+}
+
+{{ VENV_PATH }}/logs/celery*.log {
+	size 100M
+	create 0660 www-data {{ GID }}
+	rotate 5
+	maxage 124
+	compress
+	compresscmd /bin/bzip2
+	compressoptions -z9
+	compressext .bz2
+	copytruncate
+	notifempty
+	postrotate
+		/etc/init.d/celerybeat_{{ MODULE_NAME }}_{{ VENV_NAME }} restart && /etc/init.d/celeryd_{{ MODULE_NAME }}_{{ VENV_NAME }} restart
+	endscript
+}
+
+# copied from /etc/logrotate.d/nginx
+{{ VENV_PATH }}/logs/nginx*.log {
+	daily
+	size 100M
+	missingok
+	rotate 52
+	compress
+	delaycompress
+	notifempty
+	create 0640 www-data {{ GID }}
+	sharedscripts
+	prerotate
+		if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+			run-parts /etc/logrotate.d/httpd-prerotate; \
+		fi; \
+	endscript
+	postrotate
+		[ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid`
+	endscript
+}

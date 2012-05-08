@@ -49,6 +49,7 @@ TEMPLATE_MAPPING = {
     'START_UWSGI_SCRIPT':   ('deploy/start_uwsgi.template',             'start_uwsgi'),
     'UWSGI_INIT':           ('deploy/uwsgi-init.d.template',            'uwsgi_%(MODULE_NAME)s_%(VENV_NAME)s'),
     'UWSGI_CONF':           ('deploy/uwsgi.ini.template',               'uwsgi.ini'),
+    'LOG_ROTATE':           ('deploy/log_rotate.conf.template',         'logrotate.conf'),
 }
 
 class Command(BaseCommand):
@@ -95,7 +96,7 @@ class Command(BaseCommand):
         if not options.get('site_name'):
             raise CommandError,u"To script works you should send as paramater at least --site-name <site_name.com>"
 
-        module_name = self.__class__.__module__.split('.')[0]
+        module_name = settings.PROJECT_PATH.split('/')[-1]
         CELERYD_CONF_NAME = 'celeryd_%(module_name)s.conf' % {'module_name':module_name,}
         CELERYBEAT_CONF_NAME = 'celerybeat_%(module_name)s.conf' % {'module_name':module_name,}
         UWSGI_INI = 'uwsgi.ini'
@@ -111,6 +112,7 @@ class Command(BaseCommand):
             'UID':options.get('uid'),
             'GID':options.get('gid'),
             'PROJECT_PATH': settings.PROJECT_PATH,
+            'PROJECT_NAME': settings.PROJECT_PATH.split('/')[-1],
             'VENV_PATH': os.environ['VIRTUAL_ENV'],
             'VENV_NAME': os.environ['VIRTUAL_ENV'].split('/')[-1]
         }

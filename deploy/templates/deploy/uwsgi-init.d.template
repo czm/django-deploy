@@ -1,0 +1,47 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          portal
+# Required-Start:    $nginx $celerybeat_{{ MODULE_NAME }}_{{ VENV_NAME }}
+# Required-Stop:
+# Default-Start:     1
+# Default-Stop:
+# Short-Description: start uwsgi server {{ SITE_NAME }}:{{ SITE_PORT }}
+### END INIT INFO
+# Provides:          celerybeat
+# Required-Start:    $network $local_fs $remote_fs
+# Required-Stop:     $network $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: start uwsgi for {{ SITE_NAME }}:{{ SITE_PORT }}
+. /lib/lsb/init-functions
+
+do_start () {
+	echo "Starting {{ SITE_NAME }}:{{ SITE_PORT }}"
+	exec {{ PROJECT_PATH }}/deploy/start_uwsgi
+}
+
+do_stop () {
+	for p in $(ps aux | grep "{{ VENV_PATH }}/bin/uwsgi" | grep -v grep | awk '{print $2}');
+	do
+		echo "Killing $p"
+		kill $p
+	done
+}
+
+case "$1" in
+  start)
+	do_start
+	;;
+  restart|reload|force-reload)
+	do_stop
+	do_start
+	;;
+  stop)
+	do_stop
+	;;
+  *)
+	echo "Usage: $0 start|stop|restart" >&2
+	exit 3
+	;;
+esac
+
