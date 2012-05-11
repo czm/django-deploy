@@ -1,13 +1,17 @@
 #!/bin/bash
 
+mkdir -pv {{ VENV_PATH }}/{logs,tmp,var/run}
+touch {{ VENV_PATH }}/logs/uwsgi.log
+
+
 # copy scripts
 {% for name,file in INIT_FILES.items %}
 cp {{ DEPLOY_FILES_PATH }}/{{ file }} /etc/init.d/ && chmod +x /etc/init.d/{{ file }} && echo "{{ name }} copied to init.d" && update-rc.d {{ file }} defaults
 {% endfor %}
 
 # copy confs
-ln -vs {{ DEPLOY_FILES_PATH }}{{ CONF_FILES.NGINX_CONF }} /etc/nginx/sites-available/{{ MODULE_NAME }}__{{ VENV_NAME }}
-ln -vs /etc/nginx/sites-available/{{ MODULE_NAME }}__{{ VENV_NAME }} /etc/nginx/sites-enabled/{{ MODULE_NAME }}__{{ VENV_NAME }}
+ln -vs {{ DEPLOY_FILES_PATH }}{{ CONF_FILES.NGINX_CONF }} /etc/nginx/sites-available/{{ SITE_NAME }}_{{ SITE_PORT }}_{{ VENV_NAME }}.conf
+ln -vs /etc/nginx/sites-available/{{ SITE_NAME }}_{{ SITE_PORT }}_{{ VENV_NAME }} /etc/nginx/sites-enabled/{{ SITE_NAME }}_{{ SITE_PORT }}_{{ VENV_NAME }}.conf
 
 # restart scripts
 {% for name,file in INIT_FILES.items %}

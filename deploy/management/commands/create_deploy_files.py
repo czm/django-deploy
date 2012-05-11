@@ -40,9 +40,9 @@ DEPLOY_FILES_PATH = getattr(settings,'DEPLOY_FILES_PATH',os.path.join(settings.P
 # TEMPLATE_FILE should be a file in path like normal templates used in views.
 TEMPLATE_MAPPING = {
     # KEY:                  (TEMPLATE_FILE,                             FILE_FINAL_NAME)
-    'CELERYBEAT_CONF':      ('deploy/celerybeat.conf.template',         'celerybeat.conf'),
+    'CELERYBEAT_CONF':      ('deploy/celerybeat.conf.template',         'celerybeat_%(MODULE_NAME)s.conf'),
     'CELERYBEAT_INIT':      ('deploy/celerybeat-init.d.template',       'celerybeat_%(MODULE_NAME)s_%(VENV_NAME)s'),
-    'CELERYD_CONF':         ('deploy/celeryd.conf.template',            'celeryd.conf'),
+    'CELERYD_CONF':         ('deploy/celeryd.conf.template',            'celeryd_%(MODULE_NAME)s.conf'),
     'CELERYD_INIT':         ('deploy/celeryd-init.d.template',          'celeryd_%(MODULE_NAME)s_%(VENV_NAME)s'),
     'INSTALL_ROOT_SCRIPT':  ('deploy/install_init_scripts.sh.template', 'install_init_scripts.sh'),
     'NGINX_CONF':           ('deploy/nginx.conf.template',              'nginx.conf'),
@@ -155,5 +155,5 @@ class Command(BaseCommand):
             os.chown(f.name,pwd.getpwnam(CONTEXT_VARS['UID'])[2],grp.getgrnam(CONTEXT_VARS['GID'])[2])
             os.chmod(f.name,0664)
 
-            if 'init.d' in template_name or 'install' in template_name:
+            if 'init.d' in template_name or 'install' in template_name or 'start_uwsgi' in template_name    :
                 os.chmod(f.name,0775)

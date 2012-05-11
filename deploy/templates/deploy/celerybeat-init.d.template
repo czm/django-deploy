@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # =========================================================
 #  celerybeat - Starts the Celery periodic task scheduler.
@@ -21,7 +20,7 @@
 # Cannot use set -e/bash -e since the kill -0 command will abort
 # abnormally in the absence of a valid process ID.
 #set -e
-SCRIPT_NAME=[[ "$BASH_SOURCE" != "" ]] && "$BASH_SOURCE" || $0
+SCRIPT_NAME="${BASH_SOURCE:-$0}"
 
 DEFAULT_PID_FILE="/var/run/celerybeat.pid"
 DEFAULT_LOG_FILE="/var/log/celerybeat.log"
@@ -40,7 +39,7 @@ fi
 
 CELERYBEAT=${CELERYBEAT:-$DEFAULT_CELERYBEAT}
 CELERYBEAT_PID_FILE=${CELERYBEAT_PID_FILE:-${CELERYBEAT_PIDFILE:-$DEFAULT_PID_FILE}}
-CELERYBEAT_LOG_FILE=${CELERYBEAT_LOG_FILE:-${CELERYBEAT_LOGFILE:-$DEFAULT_LOG_FILE}}
+CELERYBEAT_LOG_FILEa=${CELERYBEAT_LOG_FILE:-${CELERYBEAT_LOGFILE:-$DEFAULT_LOG_FILE}}
 CELERYBEAT_LOG_LEVEL=${CELERYBEAT_LOG_LEVEL:-${CELERYBEAT_LOGLEVEL:-$DEFAULT_LOG_LEVEL}}
 
 export CELERY_LOADER
@@ -85,29 +84,48 @@ check_dev_null() {
     fi
 }
 
-wait_pid () {
-    pid=$1
-    forever=1
-    i=0
-    while [ $forever -gt 0 ]; do
-        kill -0 $pid 1>/dev/null 2>&1
-        if [ $? -eq 1 ]; then
-            echo "OK"
-            forever=0
-        else
-            kill -TERM "$pid"
-            i=$((i + 1))
-            if [ $i -gt 60 ]; then
-                echo "ERROR"
-                echo "Timed out while stopping (30s)"
-                forever=0
-            else
-                sleep 0.5
-            fi
-        fi
-    done
-}
+# This wait_pid make this script enter in infinite loop.
+#wait_pid () {
+#    pid=$1
+#    forever=1
+#    i=0
+#    while [ $forever -gt 0 ]; do
+#        kill -0 $pid 1>/dev/null 2>&1
+#        if [ $? -eq 1 ]; then
+#            echo "OK"
+#            forever=0
+#        else
+#            kill -TERM "$pid"
+#            i=$((i + 1))
+#            if [ $i -gt 60 ]; then
+#                echo "ERROR"
+#                echo "Timed out while stopping (30s)"
+#                forever=0
+#            else
+#                sleep 0.5
+#            fi
+#        fi
+#    done
+#}
 
+wait_pid () {
+    pid=$1;
+    [ -ne $pid ] && return 1
+    echo "Trying to kill pid $pid"
+    count=60;
+    while [ $count -gt 0 ];do
+        echo "Count $count"
+        kill -0 $pid 2>/dev/null
+        if [ $? -eq 1 ];then
+            echo "OK"
+            break
+        else
+            kill -TERM $pid && echo "OK" && break
+        fi
+        count=$((count-1))
+        sleep 0.5
+    done;
+}
 
 stop_beat () {
     echo -n "Stopping celerybeat ... "

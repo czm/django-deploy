@@ -5,14 +5,15 @@ export DJANGO_SETTINGS_MODULE="{{ MODULE_NAME }}.settings"
 CELERYBEAT_CHDIR="{{ PROJECT_PATH }}"
 
 # Path to celerybeat
-CELERYBEAT="${CELERYBEAT_CHDIR}/manage.py celerybeat"
+CELERYBEAT="$ENV_PYTHON $CELERYBEAT_CHDIR/manage.py celerybeat"
+
 
 # Extra arguments to celerybeat
 CELERYBEAT_OPTS="--schedule={{ VENV_PATH }}/var/run/celerybeat-schedule"
 
 # %n will be replaced with the nodename.
-CELERYBEAT_LOG_FILE="{{ VENV_PATH }}/var/log/celery/%n-beat.log"
-CELERYBEAT_PID_FILE="{{ VENV_PATH }}/var/run/celery/%n-beat.pid"
+CELERYBEAT_LOG_FILE="{{ VENV_PATH }}/logs/celery/{{ SITE_NAME }}-beat.log"
+CELERYBEAT_PID_FILE="{{ VENV_PATH }}/var/run/celery/{{ SITE_NAME }}-beat.pid"
 
 # Workers should run as an unprivileged user.
 CELERYBEAT_USER="{{ UID }}"

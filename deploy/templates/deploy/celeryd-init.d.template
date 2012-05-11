@@ -19,7 +19,7 @@
 ### END INIT INFO
 
 #set -e
-SCRIPT_NAME=[[ "$BASH_SOURCE" != "" ]] && "$BASH_SOURCE" || $0
+SCRIPT_NAME="${BASH_SOURCE:-$0}"
 
 DEFAULT_PID_FILE="{{ VENV_PATH }}/var/run/celeryd@{{ SITE_NAME }}.pid"
 DEFAULT_LOG_FILE="{{ VENV_PATH}}/logs/celeryd@{{ SITE_NAME }}.log"
