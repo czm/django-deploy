@@ -128,6 +128,13 @@ class Command(BaseCommand):
         if not os.path.exists(DEPLOY_FILES_PATH):
             os.makedirs(DEPLOY_FILES_PATH,0775)
 
+        if 'djcelery' not in settings.INSTALLED_APPS:
+            # remove celery from TEMPLATE_MAPPING
+            TEMPLATE_MAPPING.pop('CELERYBEAT_CONF')
+            TEMPLATE_MAPPING.pop('CELERYBEAT_INIT')
+            TEMPLATE_MAPPING.pop('CELERYD_CONF')
+            TEMPLATE_MAPPING.pop('CELERYD_INIT')
+
         CONTEXT_VARS['INIT_FILES'] = {}
         CONTEXT_VARS['CONF_FILES'] = {}
 
@@ -157,3 +164,10 @@ class Command(BaseCommand):
 
             if 'init.d' in template_name or 'install' in template_name or 'start_uwsgi' in template_name    :
                 os.chmod(f.name,0775)
+
+
+
+
+
+
+
