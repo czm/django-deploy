@@ -12,7 +12,7 @@ from optparse import make_option
 from pprint import pprint
 import datetime
 import os, sys, pwd, grp, logging
-
+import django
 
 # init logging stuff
 log = logging.getLogger('management_commands')
@@ -102,6 +102,7 @@ class Command(BaseCommand):
         UWSGI_INI = 'uwsgi.ini'
 
         CONTEXT_VARS = {
+            'DJANGO_VERSION': django.get_version(),
             'DEPLOY_FILES_PATH': DEPLOY_FILES_PATH,
             'MODULE_NAME': module_name,
             'CELERYBEAT_CONF':os.path.join(DEPLOY_FILES_PATH,CELERYBEAT_CONF_NAME),

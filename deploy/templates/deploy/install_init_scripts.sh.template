@@ -1,4 +1,13 @@
 #!/bin/bash
+. {{ VENV_PATH }}/bin/activate
+
+{% if '1.4' not in DJANGO_VERSION %}
+rm {{ PROJECT_PATH }}/{{ PROJECT_NAME }} &>/dev/null
+ln -vsf {{ PROJECT_PATH }} {{ PROJECT_PATH }}/{{ PROJECT_NAME }}
+{% endif %}
+
+# in virtualenvs we have only one version of python, but can not know what version
+for e in ${VIRTUAL_ENV}/lib/python*;do pwd > ${e}/site-packages/{{ PROJECT_NAME }}.pth;done
 
 mkdir -pv {{ VENV_PATH }}/{logs,tmp,var/run}
 touch {{ VENV_PATH }}/logs/uwsgi.log
@@ -13,8 +22,8 @@ cp {{ DEPLOY_FILES_PATH }}/{{ file }} /etc/init.d/ && chmod +x /etc/init.d/{{ fi
 {% endfor %}
 
 # copy confs
-ln -vs {{ DEPLOY_FILES_PATH }}/{{ CONF_FILES.NGINX_CONF }} /etc/nginx/sites-available/{{ SITE_NAME }}_{{ SITE_PORT }}_{{ VENV_NAME }}.conf
-ln -vs /etc/nginx/sites-available/{{ SITE_NAME }}_{{ SITE_PORT }}_{{ VENV_NAME }}.conf /etc/nginx/sites-enabled/{{ SITE_NAME }}_{{ SITE_PORT }}_{{ VENV_NAME }}.conf
+ln -vfs {{ DEPLOY_FILES_PATH }}/{{ CONF_FILES.NGINX_CONF }} /etc/nginx/sites-available/{{ SITE_NAME }}_{{ SITE_PORT }}_{{ VENV_NAME }}.conf
+ln -vfs /etc/nginx/sites-available/{{ SITE_NAME }}_{{ SITE_PORT }}_{{ VENV_NAME }}.conf /etc/nginx/sites-enabled/{{ SITE_NAME }}_{{ SITE_PORT }}_{{ VENV_NAME }}.conf
 
 # restart scripts
 {% for name,file in INIT_FILES.items %}
@@ -25,7 +34,7 @@ sleep 2
 {% endfor %}
 
 echo "Setting up log rotate..."
-ln -vs {{ DEPLOY_FILES_PATH }}/{{ CONF_FILES.LOG_ROTATE }} /etc/logrotate.d/{{ SITE_NAME }}.conf
+ln -vfs {{ DEPLOY_FILES_PATH }}/{{ CONF_FILES.LOG_ROTATE }} /etc/logrotate.d/{{ SITE_NAME }}.conf
 
 printf "Testing nginx conf ..."
 /etc/init.d/nginx configtest && echo "[OK]" || exit 1
