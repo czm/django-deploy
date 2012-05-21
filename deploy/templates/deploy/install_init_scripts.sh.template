@@ -7,7 +7,7 @@ ln -vsf {{ PROJECT_PATH }} {{ PROJECT_PATH }}/{{ PROJECT_NAME }}
 {% endif %}
 
 # in virtualenvs we have only one version of python, but can not know what version
-for e in ${VIRTUAL_ENV}/lib/python*;do pwd > ${e}/site-packages/{{ PROJECT_NAME }}.pth;done
+for e in ${VIRTUAL_ENV}/lib/python*;do echo "{{ PROJECT_PATH }}" > ${e}/site-packages/{{ PROJECT_NAME }}.pth;done
 
 mkdir -pv {{ VENV_PATH }}/{logs,tmp,var/run}
 touch {{ VENV_PATH }}/logs/uwsgi.log
