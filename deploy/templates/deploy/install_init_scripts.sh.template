@@ -39,7 +39,5 @@ ln -vfs {{ DEPLOY_FILES_PATH }}/{{ CONF_FILES.LOG_ROTATE }} /etc/logrotate.d/{{ 
 printf "Testing nginx conf ..."
 /etc/init.d/nginx configtest && echo "[OK]" || exit 1
 
-echo "Restarting nginx ..."
-/etc/init.d/nginx stop
-sleep 2
-/etc/init.d/nginx start
+echo "Reloading nginx ..."
+/etc/init.d/nginx reload
