@@ -14,7 +14,7 @@ touch {{ VENV_PATH }}/logs/uwsgi.log
 touch {{ VENV_PATH }}/tmp/restart.txt
 chmod -R 2775 {{ VENV_PATH }}/{logs,tmp,var/run}
 find {{ VENV_PATH }}/{logs,tmp,var/run} -type f | xargs chmod 664 -v
-chown -R felipe:www-data {{ VENV_PATH }}/{logs,tmp,var/run}
+chown -R {{ UID }}:www-data {{ VENV_PATH }}/{logs,tmp,var/run}
 
 # copy scripts
 {% for name,file in INIT_FILES.items %}
