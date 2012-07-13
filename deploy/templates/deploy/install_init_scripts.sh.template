@@ -3,6 +3,7 @@
 
 {% if '1.4' not in DJANGO_VERSION %}
 rm {{ PROJECT_PATH }}/{{ PROJECT_NAME }} &>/dev/null
+-ln -vsf {{ PROJECT_PATH }} {{ PROJECT_PATH }}/{{ PROJECT_NAME }}
 {% endif %}
 
 # in virtualenvs we have only one version of python, but can not know what version
