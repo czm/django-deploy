@@ -21,6 +21,27 @@ server {
         access_log off;
     }
 
+    {% if '1.4' in DJANGO_VERSION %}
+    # media :)
+    location /media/ {
+        root {{ PROJECT_PATH }}/{{ PROJECT_NAME }};
+        # do not log media to access_log
+        location ~* ^.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|mov) {
+            access_log   off;
+            expires      30d;
+        }
+    }
+
+    # static >:)
+    location /static/ {
+        root {{ PROJECT_PATH }}/{{ PROJECT_NAME }};
+        # do not log media to access_log
+        location ~* ^.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|mov) {
+            access_log   off;
+            expires      30d;
+        }
+    }
+    {% else %}
     # media :)
     location /media/ {
         root {{ PROJECT_PATH }};
@@ -30,6 +51,8 @@ server {
             expires      30d;
         }
     }
+    {% endif %}
+
 
     # we can collect status from there.
     location /nginx_status {
